@@ -1,0 +1,30 @@
+# 运行时目录与日志
+.run/
+*.log
+*.log.err
+server.pid
+server.url
+runtime.json
+
+# 生成的许可证与打包文件
+*.mxtpro
+*.key
+
+# 测试下载与中间临时文件
+e2e_downloads/
+e2e_downloads_single/
+scratch/
+test-output/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+*.pyo
+
+# 系统与 IDE 缓存
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.bak

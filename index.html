@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="antialiased">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MobaXterm Keygen · 本地离线增强版</title>
+<meta name="description" content="MobaXterm license 生成 + Customizer 与 license 合并 / 全离线" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%94%91%3C/text%3E%3C/svg%3E" />
+
+<!-- 全部本地，无任何外链 -->
+<link href="./site/pure-min.css" rel="stylesheet" />
+<script src="./site/tailwind.js"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Outfit', 'Segoe UI', 'Microsoft YaHei UI', 'system-ui', 'sans-serif'] },
+        colors: {
+          primary: {
+            50: '#eef2ff', 100: '#e0e7ff', 200: '#c3dafe', 300: '#a3bffa',
+            400: '#7f9cf5', 500: '#667eea', 600: '#5a67d8', 700: '#4c51bf',
+            800: '#434190', 900: '#3c366b'
+          }
+        },
+        animation: { 'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards' }
+      }
+    }
+  };
+</script>
+<link href="./src/app.css" rel="stylesheet" />
+<script>
+  // 主题要在首帧前定好，避免闪白
+  (function () {
+    try {
+      var t = localStorage.getItem('theme');
+      var dark = t ? t === 'dark'
+        : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (dark) document.documentElement.classList.add('dark');
+    } catch (e) {}
+  })();
+</script>
+</head>
+
+<body class="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
+
+<!-- Aurora 背景（来自 fire.css） -->
+<div class="jumbo" aria-hidden="true"></div>
+
+<div id="app" class="relative z-10 min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
+
+  <div class="w-full max-w-3xl backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border border-white/60 dark:border-slate-700/60 rounded-3xl shadow-2xl shadow-slate-900/10 overflow-hidden">
+
+    <!-- Header -->
+    <header class="px-6 sm:px-10 pt-8 pb-6 flex items-center justify-between border-b border-slate-200/60 dark:border-slate-700/60">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-800 dark:text-slate-100">
+          MobaXterm <span class="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-pink-500">Keygen</span>
+        </h1>
+        <p class="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
+          本地离线增强版 · 生成器 + 合并器 · 无任何网络请求
+        </p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="hidden sm:inline-block px-3 py-1 rounded-full text-[11px] font-bold tracking-wider
+                     bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+          OFFLINE
+        </span>
+        <button id="theme-toggle" type="button"
+                class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700
+                       text-slate-600 dark:text-slate-300 transition-colors"
+                aria-label="切换主题">
+          <svg id="theme-icon-dark" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l.707.707M6.343 17.657l.707.707M16 12a11 11 0 11-8 0 11 11 0 018 0z" />
+          </svg>
+          <svg id="theme-icon-light" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Tabs -->
+    <div class="px-6 sm:px-10 mt-6">
+      <nav class="flex gap-2 bg-slate-200/60 dark:bg-slate-800/60 p-1.5 rounded-2xl border border-slate-300/30 dark:border-slate-700/50"
+           aria-label="功能切换">
+        <button type="button" @click="activeTab = 'keyGenerator'"
+                :class="[activeTab === 'keyGenerator'
+                  ? 'bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-300 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200',
+                  'flex-1 py-2.5 text-sm font-bold transition-all duration-300 rounded-xl tracking-wide']">
+          生成器
+        </button>
+        <button type="button" @click="activeTab = 'customMerger'"
+                :class="[activeTab === 'customMerger'
+                  ? 'bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-300 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200',
+                  'flex-1 py-2.5 text-sm font-bold transition-all duration-300 rounded-xl tracking-wide']">
+          合并器 <span class="ml-1 text-[10px] font-black px-1.5 py-0.5 rounded bg-pink-500 text-white align-middle">NEW</span>
+        </button>
+        <button type="button" @click="activeTab = 'help'"
+                :class="[activeTab === 'help'
+                  ? 'bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-300 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200',
+                  'py-2.5 px-4 text-sm font-bold transition-all duration-300 rounded-xl tracking-wide']">
+          说明
+        </button>
+      </nav>
+    </div>
+
+    <!-- ============ 生成器 ============ -->
+    <section v-show="activeTab === 'keyGenerator'" class="px-6 sm:px-10 py-8 animate-fade-in-up">
+      <form @submit.prevent="generate">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <!-- Edition -->
+          <div class="md:col-span-2 group">
+            <label for="licenseType" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 ml-1">版本类型</label>
+            <div class="relative">
+              <div class="field-icon">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+              </div>
+              <select id="licenseType" v-model.number="licenseType"
+                      class="input-modern block w-full pl-11 pr-10 py-3.5 rounded-xl outline-none appearance-none font-medium cursor-pointer">
+                <option v-for="(val, key) in LICENSE_TYPES" :key="key" :value="val">{{ key }}</option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+            <p v-if="errors.licenseType" class="mt-1.5 ml-1 text-red-500 text-xs font-medium">{{ errors.licenseType }}</p>
+          </div>
+
+          <!-- Username -->
+          <div class="group">
+            <label for="userName" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 ml-1">用户名</label>
+            <div class="relative">
+              <div class="field-icon">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <input type="text" id="userName" v-model="userName" placeholder="示例 defaultUser"
+                     class="input-modern block w-full pl-11 pr-4 py-3.5 rounded-xl outline-none" />
+            </div>
+            <p v-if="errors.userName" class="mt-1.5 ml-1 text-red-500 text-xs font-medium">{{ errors.userName }}</p>
+            <p v-else class="mt-1.5 ml-1 text-slate-400 dark:text-slate-500 text-[11px]">只能使用字母</p>
+          </div>
+
+          <!-- Version -->
+          <div class="group">
+            <div class="flex items-center justify-between mb-1.5 ml-1">
+              <label for="versionName" class="text-sm font-semibold text-slate-700 dark:text-slate-300">版本号</label>
+              <span class="text-[11px] text-slate-400 dark:text-slate-500 font-normal">支持完全手动输入</span>
+            </div>
+            <div class="relative">
+              <div class="field-icon">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+              </div>
+              <input type="text" id="versionName" v-model="versionName" placeholder="示例 26.5 或 21.0"
+                     class="input-modern block w-full pl-11 pr-4 py-3.5 rounded-xl outline-none" />
+            </div>
+            <!-- 快捷预设（点击自动填入，输入框仍可完全手动随意编辑） -->
+            <div class="flex flex-wrap items-center gap-1.5 mt-2 ml-1">
+              <span class="text-[11px] text-slate-400 dark:text-slate-500 font-medium">快捷填入:</span>
+              <button v-for="ver in versionPresets" :key="ver" type="button" @click="setVersion(ver)"
+                      :class="[versionName === ver
+                        ? 'bg-primary-500 text-white shadow-xs'
+                        : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300']"
+                      class="px-2 py-0.5 rounded-lg text-[11px] font-mono font-semibold transition-colors cursor-pointer">
+                {{ ver }}<span v-if="ver === '26.5'" class="ml-0.5 text-[9px] opacity-80">最新</span>
+              </button>
+            </div>
+            <p v-if="errors.versionName" class="mt-1.5 ml-1 text-red-500 text-xs font-medium">{{ errors.versionName }}</p>
+            <p v-else-if="versionWarn" class="mt-1.5 ml-1 text-amber-500 text-[11px] font-medium">⚠ {{ versionWarn }}</p>
+            <p v-else class="mt-1 ml-1 text-slate-400 dark:text-slate-500 text-[11px]">小数且小数点后最多 1 位（例如 26.5，支持手动修改）</p>
+          </div>
+
+          <!-- User count -->
+          <div class="group">
+            <label for="userNum" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 ml-1">用户数</label>
+            <div class="relative">
+              <div class="field-icon">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <input type="number" id="userNum" v-model.number="userNum" placeholder="示例 1" min="1"
+                     class="input-modern block w-full pl-11 pr-4 py-3.5 rounded-xl outline-none" />
+            </div>
+            <p v-if="errors.userNum" class="mt-1.5 ml-1 text-red-500 text-xs font-medium">{{ errors.userNum }}</p>
+          </div>
+
+          <!-- 严格白名单开关 -->
+          <div class="group">
+            <span class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 ml-1">版本白名单</span>
+            <label class="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-slate-100/70 dark:bg-slate-800/60
+                          border border-slate-300/50 dark:border-slate-700/60 cursor-pointer select-none">
+              <input type="checkbox" v-model="strictVersion" class="w-4 h-4 accent-primary-600" />
+              <span class="text-sm font-medium text-slate-600 dark:text-slate-300">
+                严格模式<span class="text-slate-400 dark:text-slate-500 font-normal">（只放行 20–27）</span>
+              </span>
+            </label>
+          </div>
+
+          <!-- 输出文件名 -->
+          <div class="group md:col-span-2">
+            <label for="outName" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 ml-1">输出文件名</label>
+            <input type="text" id="outName" v-model="adv.fileName"
+                   class="input-modern block w-full px-4 py-3 rounded-xl outline-none font-mono text-sm" />
+          </div>
+
+          <!-- 生成按钮 -->
+          <div class="md:col-span-2 pt-1">
+            <button type="submit"
+                    class="btn-gradient w-full py-4 px-6 rounded-xl text-base font-bold tracking-wider
+                           flex items-center justify-center gap-2 uppercase">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              生成 {{ adv.fileName || 'Custom.mxtpro' }}
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- 输出 -->
+      <div class="mt-6">
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">License 字符串</label>
+          <div class="flex flex-wrap gap-2">
+            <button v-if="lastLicense" type="button" @click="copyDeployCmd"
+                    class="px-3 py-1 text-xs font-bold rounded-lg bg-emerald-100 hover:bg-emerald-200
+                           dark:bg-emerald-900/40 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 transition-colors">
+              复制部署命令
+            </button>
+            <button type="button" @click="copyLicense"
+                    class="px-3 py-1 text-xs font-bold rounded-lg bg-slate-100 hover:bg-slate-200
+                           dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors">
+              复制
+            </button>
+            <button type="button" @click="pushLicenseToMerger"
+                    class="px-3 py-1 text-xs font-bold rounded-lg bg-primary-500 hover:bg-primary-600
+                           text-white transition-colors">
+              送到合并器 →
+            </button>
+          </div>
+        </div>
+        <textarea id="licenseOut" readonly v-model="lastLicense" rows="2"
+                  placeholder="点击上面的按钮生成后，license 会显示在这里"
+                  class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200
+                         dark:border-slate-700 font-mono text-xs text-slate-700 dark:text-slate-300
+                         resize-none outline-none focus:border-primary-500 transition-colors"></textarea>
+        <!-- 反向解析详情卡片 -->
+        <div v-if="parsedLastLicense" class="mt-2.5 px-3.5 py-2.5 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
+          <span class="inline-flex items-center gap-1 font-bold text-[11px] text-emerald-600 dark:text-emerald-400">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            已解析验签
+          </span>
+          <span class="text-slate-600 dark:text-slate-300">类型: <strong class="text-primary-600 dark:text-primary-400">{{ parsedLastLicense.typeName }}</strong></span>
+          <span class="text-slate-600 dark:text-slate-300">用户: <strong class="font-mono text-slate-800 dark:text-slate-200">{{ parsedLastLicense.userName }}</strong></span>
+          <span class="text-slate-600 dark:text-slate-300">目标: <strong class="font-mono text-slate-800 dark:text-slate-200">v{{ parsedLastLicense.version }}</strong></span>
+          <span class="text-slate-600 dark:text-slate-300">用户数: <strong class="font-mono text-slate-800 dark:text-slate-200">{{ parsedLastLicense.userCount }}</strong></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 合并器 ============ -->
+    <section v-show="activeTab === 'customMerger'" class="px-6 sm:px-10 py-8 animate-fade-in-up">
+      <div class="bg-primary-50/80 dark:bg-primary-900/10 border border-primary-100 dark:border-primary-800/30
+                  p-5 rounded-2xl mb-6">
+        <div class="flex items-start gap-3">
+          <div class="bg-primary-100 dark:bg-primary-800 p-2 rounded-lg text-primary-600 dark:text-primary-300 shrink-0">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-primary-900 dark:text-primary-100 mb-1">怎么用</h3>
+            <ol class="text-xs text-primary-700 dark:text-primary-300 space-y-1 ml-4 list-decimal marker:text-primary-500 font-medium leading-relaxed">
+              <li>在「生成器」里生成 license（或直接用「送到合并器 →」）</li>
+              <li>在 MobaXterm 目录执行 <code class="bg-white/60 dark:bg-black/40 px-1 rounded font-mono">.\MobaXterm.exe -customizer</code></li>
+              <li>导出设置到 <code class="bg-white/60 dark:bg-black/40 px-1 rounded font-mono">MobaXterm customization.custom</code></li>
+              <li>把两个文件都放进下面两个框，点「合并」</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- license 文件 -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 ml-1">
+            License (.mxtpro)
+          </label>
+          <label for="licenseFileInput"
+                 class="drop-zone group"
+                 @dragover.prevent
+                 @drop.prevent="onDrop($event, 'license')">
+            <svg class="w-7 h-7 mb-2 text-slate-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            <p class="text-sm font-semibold px-4 max-w-full truncate"
+               :class="licenseFile ? 'text-emerald-600 dark:text-emerald-400' : 'text-primary-600 dark:text-primary-400'">
+              {{ licenseFileName || '点击或拖拽上传' }}
+            </p>
+            <p v-if="!licenseFile" class="text-[11px] text-slate-400 mt-1">没有？用生成器生成后一键送入</p>
+            <input type="file" id="licenseFileInput" @change="handleLicenseFileUpload" accept=".mxtpro" class="hidden" />
+          </label>
+          <p v-if="mergeErrors.licenseFile" class="mt-1.5 ml-1 text-red-500 text-xs font-medium">{{ mergeErrors.licenseFile }}</p>
+          <div v-if="inspect.proKey" class="mt-2 px-3 py-2.5 rounded-lg bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-700">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Pro.key 内容</span>
+              <span v-if="inspect.parsedKey" class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                {{ inspect.parsedKey.typeName }} / {{ inspect.parsedKey.userName }} / v{{ inspect.parsedKey.version }} / {{ inspect.parsedKey.userCount }} 用户
+              </span>
+            </div>
+            <p class="font-mono text-[10px] text-slate-600 dark:text-slate-400 break-all leading-relaxed">{{ inspect.proKey }}</p>
+          </div>
+        </div>
+
+        <!-- custom 文件 -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 ml-1">
+            Custom Settings (.custom)
+          </label>
+          <label for="customSettingsFileInput"
+                 class="drop-zone group"
+                 @dragover.prevent
+                 @drop.prevent="onDrop($event, 'custom')">
+            <svg class="w-7 h-7 mb-2 text-slate-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <p class="text-sm font-semibold px-4 max-w-full truncate"
+               :class="customSettingsFile ? 'text-emerald-600 dark:text-emerald-400' : 'text-primary-600 dark:text-primary-400'">
+              {{ customFileName || '点击或拖拽上传' }}
+            </p>
+            <p v-if="!customSettingsFile" class="text-[11px] text-slate-400 mt-1">由 -customizer 导出的包</p>
+            <input type="file" id="customSettingsFileInput" @change="handleCustomSettingsFileUpload" accept=".custom" class="hidden" />
+          </label>
+          <p v-if="mergeErrors.customSettingsFile" class="mt-1.5 ml-1 text-red-500 text-xs font-medium">{{ mergeErrors.customSettingsFile }}</p>
+          <div v-if="inspect.custom.length" class="mt-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-700 max-h-28 overflow-auto">
+            <p class="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">
+              .custom 内 {{ inspect.custom.length }} 个文件
+            </p>
+            <ul class="font-mono text-[10px] text-slate-600 dark:text-slate-400 space-y-0.5">
+              <li v-for="p in inspect.custom.slice(0, 40)" :key="p" class="truncate">· {{ p }}</li>
+              <li v-if="inspect.custom.length > 40" class="text-slate-400">… 其余 {{ inspect.custom.length - 40 }} 个</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="inspect.warnings && inspect.warnings.length" class="mt-4 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50">
+        <p v-for="w in inspect.warnings" :key="w" class="text-xs font-medium text-amber-700 dark:text-amber-300">⚠ {{ w }}</p>
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
+        <button type="button" @click="mergeFiles" :disabled="!canMerge"
+                class="btn-gradient w-full py-4 px-6 rounded-xl text-base font-bold uppercase tracking-wider
+                       flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+          </svg>
+          合并并下载
+        </button>
+        <button type="button" @click="clearFiles"
+                class="px-5 py-4 rounded-xl font-bold text-sm bg-slate-100 hover:bg-slate-200
+                       dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors">
+          清空
+        </button>
+      </div>
+
+      <p v-if="lastMergedName" class="mt-3 text-xs text-emerald-600 dark:text-emerald-400 font-medium ml-1">
+        ✓ 已下载 {{ lastMergedName }}（{{ fmtBytes(lastMergedSize) }}）
+      </p>
+    </section>
+
+    <!-- ============ 说明 ============ -->
+    <section v-show="activeTab === 'help'" class="px-6 sm:px-10 py-8 animate-fade-in-up space-y-5">
+      <div class="space-y-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base">部署位置</h3>
+          <button type="button" @click="copyDeployCmd" class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors">
+            复制部署命令
+          </button>
+        </div>
+        <p class="font-mono text-xs bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-700
+                  rounded-lg px-4 py-3 text-slate-700 dark:text-slate-300">
+          C:\Program Files (x86)\Mobatek\MobaXterm\Custom.mxtpro
+        </p>
+
+        <div class="flex items-center justify-between pt-2">
+          <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base">许可证重置与排错</h3>
+          <button type="button" @click="copyCleanCmd" class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors">
+            复制清理命令
+          </button>
+        </div>
+        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+          若更新后未能成功激活，请删除旧的 <code class="font-mono">Custom.mxtpro</code>，并清空 <code class="font-mono">%APPDATA%\MobaXterm\MobaXterm.ini</code> 中的 <code class="font-mono">[License]</code> 字段。
+        </p>
+
+        <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base pt-2">生成逻辑</h3>
+        <pre class="text-[11px] font-mono bg-slate-50 dark:bg-slate-950/60 border border-slate-200
+                    dark:border-slate-700 rounded-lg px-4 py-3 overflow-x-auto text-slate-700 dark:text-slate-300">Type=1 Professional / 3 Educational / 4 Personal
+明文  = "{Type}#{User}|{Major}{Minor}#{Count}#{Major}3{Minor}6{Minor}#0#0#0#"
+密钥  = 0x787，逐字节 XOR((key>>8)&0xff)，然后 key = (密文字节 & key) | 0x482D
+编码  = 变种 Base64（3 字节小端拼 24bit，先取低 6 位）
+产物  = zip 内单个 Pro.key</pre>
+
+        <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base pt-2">注意事项</h3>
+        <ul class="list-disc ml-5 space-y-1.5 text-xs">
+          <li>换 license 前先删掉旧的 <code class="font-mono">Custom.mxtpro</code>，并清掉 <code class="font-mono">MobaXterm.ini</code> 里的 <code class="font-mono">[License]</code> 段。</li>
+          <li>文件名必须是 <code class="font-mono">Custom.mxtpro</code>，不能出现 <code class="font-mono">Custom (1).mxtpro</code>。</li>
+          <li>用户名只允许字母 —— 数字和符号在某些版本上会导致校验失败。</li>
+          <li>版本号小数位最多 1 位，<code class="font-mono">26.10</code> 会被拒绝。</li>
+        </ul>
+
+        <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base pt-2">来源</h3>
+        <ul class="list-disc ml-5 space-y-1 text-xs">
+          <li>算法原件：<code class="font-mono">site/mobaXtermGenerater.js</code>（官网抓取，未改动）</li>
+          <li>合并器：<code class="font-mono">src/mergeZipFiles.js</code>（移植自 zarfadev/MobaXterm-Keygen）</li>
+          <li>命令行版：<code class="font-mono">keygen.py</code>，支持 <code class="font-mono">--merge</code></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="px-6 sm:px-10 py-5 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between flex-wrap gap-2">
+      <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+        本地离线 · 零网络请求 · v1.0
+      </span>
+      <button type="button" @click="openGithub"
+              class="text-[11px] font-bold text-primary-600 dark:text-primary-400 hover:underline">
+        GitHub 仓库 ↗
+      </button>
+    </footer>
+  </div>
+
+  <p class="mt-6 text-[11px] text-slate-400 dark:text-slate-600 text-center max-w-xl px-4">
+    仅用于学习与逆向研究。商业环境请购买官方授权。
+  </p>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-6 right-6 px-5 py-3.5 rounded-xl shadow-2xl transform translate-y-24 opacity-0
+                       transition-all duration-300 z-50 hidden flex items-center gap-2 backdrop-blur-md font-semibold text-sm
+                       border border-black/5">
+  <svg id="toast-icon-success" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+  </svg>
+  <svg id="toast-icon-error" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+  </svg>
+  <span id="toast-text"></span>
+</div>
+
+<script src="./site/vue.min-2.6.12.js"></script>
+<script src="./site/FileSaver.min.js"></script>
+<script src="./site/jszip.min.js"></script>
+<script type="module" src="./src/app.js"></script>
+</body>
+</html>
